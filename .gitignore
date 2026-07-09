@@ -1,7 +1,8 @@
 node_modules
-dist
-dist-ssr
 .env
 .env.local
-*.local
+uploads/*
+!uploads/.gitkeep
+dist
+build
 .DS_Store
