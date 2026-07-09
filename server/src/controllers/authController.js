@@ -1,6 +1,8 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
+const ALLOWED_REGISTER_ROLES = ["candidate", "recruiter"];
+
 const generateToken = (userId) => {
   return jwt.sign({ id: userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN || "7d",
@@ -19,10 +21,14 @@ const sanitizeUser = (user) => ({
 // POST /api/auth/register
 const register = async (req, res, next) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Name, email, and password are required" });
+    }
+
+    if (role && !ALLOWED_REGISTER_ROLES.includes(role)) {
+      return res.status(400).json({ message: "Role must be candidate or recruiter" });
     }
 
     const existingUser = await User.findOne({ email: email.toLowerCase() });
@@ -30,7 +36,7 @@ const register = async (req, res, next) => {
       return res.status(400).json({ message: "Email is already registered" });
     }
 
-    const user = await User.create({ name, email, password });
+    const user = await User.create({ name, email, password, role: role || "candidate" });
 
     const token = generateToken(user._id);
 

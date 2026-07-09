@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-import { Target } from 'lucide-react';
+import { Target, GraduationCap, Briefcase } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { homeRouteForRole } from '../../components/layout/ProtectedRoute';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import type { ApiErrorResponse } from '../../types';
+import type { ApiErrorResponse, UserRole } from '../../types';
 import axios from 'axios';
 
 interface FormErrors {
@@ -21,6 +22,7 @@ export default function RegisterPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [role, setRole] = useState<UserRole>('candidate');
   const [errors, setErrors] = useState<FormErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,9 +52,9 @@ export default function RegisterPage() {
 
     setIsSubmitting(true);
     try {
-      await register(name.trim(), email.trim(), password);
+      const newUser = await register(name.trim(), email.trim(), password, role);
       toast.success('Account created successfully!');
-      navigate('/dashboard');
+      navigate(homeRouteForRole(newUser.role));
     } catch (err) {
       const message = axios.isAxiosError<ApiErrorResponse>(err)
         ? err.response?.data?.message
@@ -78,6 +80,36 @@ export default function RegisterPage() {
 
         <div className="rounded-2xl border border-slate-100 bg-white p-8 shadow-card">
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">I am a</label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setRole('candidate')}
+                  className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
+                    role === 'candidate'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-slate-300 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <GraduationCap size={16} />
+                  Candidate
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setRole('recruiter')}
+                  className={`flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition-colors ${
+                    role === 'recruiter'
+                      ? 'border-primary-500 bg-primary-50 text-primary-700'
+                      : 'border-slate-300 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <Briefcase size={16} />
+                  Recruiter
+                </button>
+              </div>
+            </div>
+
             <Input
               label="Full Name"
               name="name"

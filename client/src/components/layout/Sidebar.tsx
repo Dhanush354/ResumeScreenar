@@ -1,5 +1,16 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileSearch, History, LogOut, Target, X } from 'lucide-react';
+import {
+  LayoutDashboard,
+  FileSearch,
+  History,
+  LogOut,
+  Target,
+  X,
+  Map,
+  Puzzle,
+  Briefcase,
+  PlusSquare,
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
@@ -7,14 +18,23 @@ interface SidebarProps {
   onClose: () => void;
 }
 
-const navItems = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/analyze', label: 'Analyze Resume', icon: FileSearch },
-  { to: '/history', label: 'History', icon: History },
+const candidateNavItems = [
+  { to: '/candidate/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/candidate/analyze', label: 'Analyze Resume', icon: FileSearch },
+  { to: '/candidate/history', label: 'History', icon: History },
+  { to: '/candidate/roadmaps', label: 'Roadmaps', icon: Map },
+  { to: '/candidate/skills', label: 'Skill Gaps', icon: Puzzle },
+];
+
+const recruiterNavItems = [
+  { to: '/recruiter/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { to: '/recruiter/jobs', label: 'Jobs', icon: Briefcase },
+  { to: '/recruiter/jobs/create', label: 'Post a Job', icon: PlusSquare },
 ];
 
 export default function Sidebar({ isOpen, onClose }: SidebarProps) {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  const navItems = user?.role === 'recruiter' ? recruiterNavItems : candidateNavItems;
 
   return (
     <>

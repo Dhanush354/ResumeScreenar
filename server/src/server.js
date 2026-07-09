@@ -10,6 +10,7 @@ const rateLimit = require("express-rate-limit");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const candidateRoutes = require("./routes/candidateRoutes");
+const recruiterRoutes = require("./routes/recruiterRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 
 const app = express();
@@ -53,6 +54,7 @@ app.get("/api/health", (req, res) => {
 // Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/candidate", candidateRoutes);
+app.use("/api/recruiter", recruiterRoutes);
 
 // 404 + centralized error handling (must be last)
 app.use(notFound);

@@ -165,4 +165,105 @@ const analyzeResumeWithJD = async (resumeText, jobDescription, jobTitle) => {
   return validateAndNormalize(parsed);
 };
 
-module.exports = { analyzeResumeWithJD, GEMINI_MODEL };
+const ALLOWED_ROADMAP_DURATIONS = ["7 days", "15 days", "30 days"];
+
+const buildRoadmapPrompt = (analysisData, duration) => {
+  return `You are a career mentor for final-year computer science students.
+
+Create a personalized learning roadmap based on the candidate's resume analysis, missing skills, weak areas, target role, and job description.
+
+Return ONLY valid JSON. Do not include markdown or explanation.
+
+Analysis Data:
+${JSON.stringify(analysisData)}
+
+Duration:
+${duration}
+
+Return JSON exactly in this structure:
+
+{
+  "duration": "${duration}",
+  "goal": "clear goal for the candidate",
+  "dailyPlan": [
+    {
+      "day": 1,
+      "topic": "topic name",
+      "tasks": ["task1", "task2", "task3"],
+      "resources": ["resource1", "resource2"],
+      "expectedOutcome": "what candidate should learn by end of day"
+    }
+  ],
+  "finalProjectSuggestion": "mini project suggestion to prove the learned skills"
+}`;
+};
+
+/**
+ * Ensures the AI roadmap response has all expected fields, with safe
+ * defaults, so the DB save never breaks even if Gemini omits/malforms a field.
+ */
+const validateAndNormalizeRoadmap = (parsed, duration) => {
+  const result = { ...parsed };
+
+  result.duration = typeof result.duration === "string" ? result.duration : duration;
+  result.goal = typeof result.goal === "string" ? result.goal : "";
+  result.finalProjectSuggestion =
+    typeof result.finalProjectSuggestion === "string" ? result.finalProjectSuggestion : "";
+
+  result.dailyPlan = Array.isArray(result.dailyPlan)
+    ? result.dailyPlan.map((item, index) => ({
+        day: Number.isFinite(Number(item?.day)) ? Number(item.day) : index + 1,
+        topic: typeof item?.topic === "string" ? item.topic : "",
+        tasks: Array.isArray(item?.tasks) ? item.tasks.filter((t) => typeof t === "string") : [],
+        resources: Array.isArray(item?.resources)
+          ? item.resources.filter((r) => typeof r === "string")
+          : [],
+        expectedOutcome: typeof item?.expectedOutcome === "string" ? item.expectedOutcome : "",
+      }))
+    : [];
+
+  return result;
+};
+
+/**
+ * Sends the resume analysis + desired duration to Gemini and returns a
+ * validated, safe-to-save roadmap JSON object.
+ */
+const generateRoadmap = async (analysisData, duration) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY is not configured in environment variables");
+  }
+
+  const genAI = new GoogleGenerativeAI(apiKey);
+  const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+
+  const prompt = buildRoadmapPrompt(analysisData, duration);
+
+  let rawText;
+  try {
+    const result = await model.generateContent(prompt);
+    rawText = result.response.text();
+  } catch (error) {
+    throw new Error(`Gemini API request failed: ${error.message}`);
+  }
+
+  const cleanedText = cleanJSONResponse(rawText);
+
+  let parsed;
+  try {
+    parsed = JSON.parse(cleanedText);
+  } catch (error) {
+    throw new Error("Failed to parse AI response as valid JSON");
+  }
+
+  return validateAndNormalizeRoadmap(parsed, duration);
+};
+
+module.exports = {
+  analyzeResumeWithJD,
+  generateRoadmap,
+  ALLOWED_ROADMAP_DURATIONS,
+  GEMINI_MODEL,
+};

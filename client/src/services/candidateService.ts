@@ -1,5 +1,5 @@
 import api from './api';
-import type { AnalyzeResumePayload, ResumeAnalysis } from '../types';
+import type { AnalyzeResumePayload, ResumeAnalysis, SkillGap } from '../types';
 
 interface AnalysesListWrapped {
   analyses: ResumeAnalysis[];
@@ -60,4 +60,9 @@ export async function getAnalysisById(id: string): Promise<ResumeAnalysis> {
 export async function deleteAnalysis(id: string): Promise<string> {
   const { data } = await api.delete<MessageResponse>(`/candidate/analyses/${id}`);
   return data?.message || 'Analysis deleted successfully';
+}
+
+export async function getSkillGaps(): Promise<SkillGap[]> {
+  const { data } = await api.get<SkillGap[]>('/candidate/skill-gaps');
+  return data;
 }

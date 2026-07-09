@@ -2,15 +2,15 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import toast from 'react-hot-toast';
 import * as authService from '../services/authService';
 import { TOKEN_KEY, USER_KEY } from '../services/api';
-import type { User } from '../types';
+import type { User, UserRole } from '../types';
 
 interface AuthContextValue {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
-  register: (name: string, email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (name: string, email: string, password: string, role: UserRole) => Promise<User>;
   logout: () => void;
 }
 
@@ -66,14 +66,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (email: string, password: string) => {
       const { token: newToken, user: newUser } = await authService.login(email, password);
       persistSession(newToken, newUser);
+      return newUser;
     },
     [persistSession]
   );
 
   const register = useCallback(
-    async (name: string, email: string, password: string) => {
-      const { token: newToken, user: newUser } = await authService.register(name, email, password);
+    async (name: string, email: string, password: string, role: UserRole) => {
+      const { token: newToken, user: newUser } = await authService.register(name, email, password, role);
       persistSession(newToken, newUser);
+      return newUser;
     },
     [persistSession]
   );

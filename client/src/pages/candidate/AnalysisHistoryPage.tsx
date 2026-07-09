@@ -68,7 +68,7 @@ export default function AnalysisHistoryPage() {
           <h1 className="text-2xl font-extrabold text-slate-900">Analysis History</h1>
           <p className="mt-1 text-sm text-slate-500">All the resume analyses you've run so far.</p>
         </div>
-        <Link to="/analyze">
+        <Link to="/candidate/analyze">
           <Button>
             <PlusCircle size={18} />
             New Analysis
@@ -83,7 +83,7 @@ export default function AnalysisHistoryPage() {
             title="No analyses yet"
             description="Your analysis history will show up here once you run your first resume match."
             action={
-              <Link to="/analyze">
+              <Link to="/candidate/analyze">
                 <Button>Analyze a Resume</Button>
               </Link>
             }
@@ -127,7 +127,7 @@ export default function AnalysisHistoryPage() {
                       <td className="px-6 py-4 text-slate-500">{formatDate(analysis.createdAt)}</td>
                       <td className="px-6 py-4">
                         <div className="flex items-center justify-end gap-2">
-                          <Link to={`/analysis/${analysis._id}`}>
+                          <Link to={`/candidate/analysis/${analysis._id}`}>
                             <Button variant="outline" size="sm">
                               <Eye size={14} />
                               View
@@ -182,7 +182,7 @@ export default function AnalysisHistoryPage() {
                   <p className="text-xs text-slate-400 ml-auto">{formatDate(analysis.createdAt)}</p>
                 </div>
                 <div className="mt-4 flex gap-2">
-                  <Link to={`/analysis/${analysis._id}`} className="flex-1">
+                  <Link to={`/candidate/analysis/${analysis._id}`} className="flex-1">
                     <Button variant="outline" size="sm" fullWidth>
                       <Eye size={14} />
                       View

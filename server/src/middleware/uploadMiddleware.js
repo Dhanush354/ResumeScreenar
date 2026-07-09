@@ -13,10 +13,22 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+const MAX_BULK_FILES = 10;
+
 const upload = multer({
   storage,
   fileFilter,
   limits: { fileSize: MAX_FILE_SIZE },
 });
 
+// Same storage/filter/size rules, but accepts up to MAX_BULK_FILES files
+// under the "resumes" field — used for recruiter bulk resume analysis.
+const uploadBulk = multer({
+  storage,
+  fileFilter,
+  limits: { fileSize: MAX_FILE_SIZE, files: MAX_BULK_FILES },
+});
+
 module.exports = upload;
+module.exports.uploadBulk = uploadBulk;
+module.exports.MAX_BULK_FILES = MAX_BULK_FILES;

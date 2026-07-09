@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { Target } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../../context/AuthContext';
+import { homeRouteForRole } from '../../components/layout/ProtectedRoute';
 import Input from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 import type { ApiErrorResponse } from '../../types';
@@ -42,9 +43,9 @@ export default function LoginPage() {
 
     setIsSubmitting(true);
     try {
-      await login(email.trim(), password);
+      const loggedInUser = await login(email.trim(), password);
       toast.success('Welcome back!');
-      navigate('/dashboard');
+      navigate(homeRouteForRole(loggedInUser.role));
     } catch (err) {
       const message = axios.isAxiosError<ApiErrorResponse>(err)
         ? err.response?.data?.message

@@ -16,6 +16,11 @@ const resumeAnalysisSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    jobId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Job",
+      default: null,
+    },
     candidateName: { type: String, default: "" },
     candidateEmail: { type: String, default: "" },
     resumeFileName: { type: String, default: "" },

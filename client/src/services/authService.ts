@@ -1,5 +1,5 @@
 import api from './api';
-import type { AuthResponse, User } from '../types';
+import type { AuthResponse, User, UserRole } from '../types';
 
 interface MeResponseWrapped {
   user: User;
@@ -13,8 +13,13 @@ function unwrapUser(data: User | MeResponseWrapped): User {
   return data as User;
 }
 
-export async function register(name: string, email: string, password: string): Promise<AuthResponse> {
-  const { data } = await api.post<AuthResponse>('/auth/register', { name, email, password });
+export async function register(
+  name: string,
+  email: string,
+  password: string,
+  role: UserRole
+): Promise<AuthResponse> {
+  const { data } = await api.post<AuthResponse>('/auth/register', { name, email, password, role });
   return data;
 }
 

@@ -97,7 +97,7 @@ export default function AnalyzeResumePage() {
         jobDescription: jobDescription.trim(),
       });
       toast.success('Analysis complete!');
-      navigate(`/analysis/${analysis._id}`);
+      navigate(`/candidate/analysis/${analysis._id}`);
     } catch (err) {
       const message = axios.isAxiosError<ApiErrorResponse>(err)
         ? err.response?.data?.message

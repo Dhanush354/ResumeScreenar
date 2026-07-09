@@ -144,4 +144,48 @@ const deleteAnalysis = async (req, res, next) => {
   }
 };
 
-module.exports = { analyzeResume, getAnalyses, getAnalysisById, deleteAnalysis };
+// GET /api/candidate/skill-gaps
+const getSkillGaps = async (req, res, next) => {
+  try {
+    const analyses = await ResumeAnalysis.find({ userId: req.user._id }).select("missingSkills");
+
+    const counts = {};
+    analyses.forEach((analysis) => {
+      (analysis.missingSkills || []).forEach((skill) => {
+        const key = skill.trim();
+        if (!key) return;
+        counts[key] = (counts[key] || 0) + 1;
+      });
+    });
+
+    const getPriority = (count) => {
+      if (count >= 3) return "High";
+      if (count === 2) return "Medium";
+      return "Low";
+    };
+
+    const getSuggestedAction = (skill) =>
+      `Build a small project or complete a focused course covering "${skill}" to close this gap.`;
+
+    const skillGaps = Object.entries(counts)
+      .map(([skill, count]) => ({
+        skill,
+        count,
+        priority: getPriority(count),
+        suggestedAction: getSuggestedAction(skill),
+      }))
+      .sort((a, b) => b.count - a.count);
+
+    return res.status(200).json(skillGaps);
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = {
+  analyzeResume,
+  getAnalyses,
+  getAnalysisById,
+  deleteAnalysis,
+  getSkillGaps,
+};
