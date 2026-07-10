@@ -46,9 +46,20 @@ const apiLimiter = rateLimit({
 });
 app.use("/api", apiLimiter);
 
+// Root route
+app.get("/", (req, res) => {
+  res.status(200).json({
+    message: "CareerFit AI Backend is running",
+    status: "success",
+  });
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
-  res.status(200).json({ status: "ok" });
+  res.status(200).json({
+    status: "ok",
+    message: "CareerFit AI API is healthy",
+  });
 });
 
 // Routes
